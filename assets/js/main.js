@@ -6,7 +6,8 @@
   const confirmation = form.querySelector("#confirmation");
   const email = form.querySelector("#email");
   const button = form.querySelector("#button");
-  const small = form.querySelector("#erro");
+
+  const inputsValidation = [login, password, confirmation];
 
   /*
       Deixando o primeiro input em foco assim que página é montada.
@@ -21,18 +22,15 @@
 
     /* -------------  LOGIN --------------- */
     if (!login.value.trim()) {
-      if (login.value.trim().length === 0) {
-        handleError(login, "Este campo é obrigatório!");
-        return;
-      }
-
       if (login.value.trim().length < 5) {
         handleError(login, "O login deve conter mais de 5 caracteres.");
-        return;
       }
-
-      setCorrectValues(login);
+      if (login.value.trim().length === 0) {
+        handleError(login, "Este campo é obrigatório!");
+      }
     }
+
+    /* -------------  PASSWORD --------------- */
 
     if (!password.value.trim()) {
       if (password.value.trim().length === 0) {
@@ -40,11 +38,43 @@
         clearCorrectValues(confirmation);
         handleError(confirmation, "As senhas devem ser iguais.");
         clearInputValue(confirmation);
-        return;
       }
     }
-  });
 
+    /* -------------  CONFIRMATION --------------- */
+
+    if (confirmation.value.trim()) {
+      if (confirmation.value.trim().length === 0) {
+        handleError(confirmation, "Este campo é obrigatório!");
+        clearInputValue(confirmation);
+      }
+      if (confirmation.value.trim() !== password.value.trim()) {
+        handleError(confirmation, "As senhas devem ser iguais.");
+      }
+    }
+
+    /* ----------------- SUBMIT -----------------*/
+
+    const validationData = inputsValidation.map((input) => {
+      return input.classList.contains("correto");
+    });
+
+    function handleValidation(validation) {
+      return validation === true;
+    }
+
+    const isValidation = validationData.every(handleValidation);
+
+    if (isValidation) {
+      const user = handleData(login, password, confirmation);
+      console.log(user);
+
+      inputsValidation.forEach((input) => {
+        clearInputValue(input);
+        clearCorrectValues(input);
+      });
+    }
+  });
   /*
       >>>> INPUT EVENTS <<<<
     */
@@ -62,7 +92,7 @@
       // Verifica se o campo de login está preenchido
       if (login.value.trim().length === 0) {
         handleError(login, "Este campo é obrigatório!");
-        clearInputValue();
+        clearInputValue(login);
         return;
       }
 
@@ -140,5 +170,13 @@
 
   function clearInputValue(inputName) {
     inputName.value = "";
+  }
+
+  function handleData(user, password, confirmation, email) {
+    return {
+      user: user.value,
+      password: password.value,
+      confirmation: confirmation.value,
+    };
   }
 })();
